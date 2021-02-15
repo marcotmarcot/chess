@@ -22,6 +22,6 @@ class Rook : public Piece {
 };
 
 void GetRookMoves(const Board& board, Position from, Color color,
-               std::vector<Position> moves);
+               std::vector<Position>& moves);
 
 #endif  // ROOK_H_

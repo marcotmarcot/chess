@@ -13,6 +13,8 @@ class Piece {
  public:
   Piece(Color color);
 
+  virtual ~Piece() = default;
+
   virtual std::string String() const = 0;
 
   virtual std::vector<Position> GetMoves(const Board& board,

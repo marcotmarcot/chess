@@ -7,7 +7,7 @@
 #include "position.h"
 
 bool GetMove(const Board& board, Position from, Color color, int x, int y,
-          std::vector<Position> moves) {
+          std::vector<Position>& moves) {
   auto to = from.Move(x, y);
   if (!to.has_value()) {
     return false;
@@ -25,7 +25,7 @@ bool GetMove(const Board& board, Position from, Color color, int x, int y,
 
 
 void GetLinearMoves(const Board& board, Position from, Color color, int direction_x,
-            int direction_y, std::vector<Position> moves) {
+            int direction_y, std::vector<Position>& moves) {
   for (int size = 1; true; ++size) {
     int x = size * direction_x;
     int y = size * direction_y;

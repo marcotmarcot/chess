@@ -19,6 +19,6 @@ class Bishop : public Piece {
 };
 
 void GetBishopMoves(const Board& board, Position from, Color color,
-                 std::vector<Position> moves);
+                 std::vector<Position>& moves);
 
 #endif  // BISHOP_H_

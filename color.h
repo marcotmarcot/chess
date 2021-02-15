@@ -3,4 +3,6 @@
 
 enum Color { kWhite, kBlack };
 
+Color Other(Color color);
+
 #endif  // COLOR_H_

@@ -28,6 +28,10 @@ Position::Position(int x, int y) : x_(x), y_(y) {
   }
 }
 
+bool Position::operator==(const Position& position) const {
+  return X() == position.X() && Y() == position.Y();
+}
+
 int Position::X() const { return x_; }
 
 int Position::Y() const { return y_; }

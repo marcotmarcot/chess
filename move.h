@@ -11,6 +11,10 @@ class Move {
   static std::optional<Move> FromString(std::string from, std::string to);
 
   Move(Position from, Position to);
+  bool operator==(const Move& move) const;
+
+  Position From() const;
+  Position To() const;
 
   std::string String() const;
 

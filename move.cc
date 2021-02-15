@@ -19,4 +19,12 @@ std::optional<Move> Move::FromString(std::string from, std::string to) {
 
 Move::Move(Position from, Position to) : from_(from), to_(to) {}
 
+bool Move::operator==(const Move& move) const {
+  return From() == move.From() && To() == move.To();
+}
+
+Position Move::From() const { return from_; }
+
+Position Move::To() const { return to_; }
+
 std::string Move::String() const { return from_.String() + " " + to_.String(); }

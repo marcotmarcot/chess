@@ -13,8 +13,10 @@ class Board {
  public:
   Board();
   void Print() const;
-  std::vector<Move> GetMoves(Color color) const;
+  std::vector<Move> GetMoves(Color color);
   const Piece* GetPiece(Position position) const;
+  bool IsCheck(Color color) const;
+  void DoMove(const Move& move);
 
  private:
   std::unique_ptr<Piece> board_[8][8];
