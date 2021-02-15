@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "board.h"
+#include "move.h"
 #include "piece.h"
 #include "position.h"
 
@@ -14,9 +15,14 @@ class Pawn : public Piece {
 
   std::string String() const override;
 
-  std::vector<Position> GetMoves(const Board& board, Position from) const override;
+  std::vector<Position> GetMoves(const Board& board,
+                                 Position from) const override;
 
   bool Double() const;
+
+  void NewTurn(Board& board, Position position) override;
+
+  void DoMove(Board& board, const Move& move) override;
 
  private:
   bool double_;

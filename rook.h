@@ -6,6 +6,7 @@
 
 #include "board.h"
 #include "color.h"
+#include "move.h"
 #include "piece.h"
 #include "position.h"
 
@@ -15,13 +16,18 @@ class Rook : public Piece {
 
   std::string String() const override;
 
-  std::vector<Position> GetMoves(const Board& board, Position from) const override;
+  std::vector<Position> GetMoves(const Board& board,
+                                 Position from) const override;
+
+  void DoMove(Board& board, const Move& move) override;
+
+  bool Moved() const;
 
  private:
   bool moved_;
 };
 
 void GetRookMoves(const Board& board, Position from, Color color,
-               std::vector<Position>& moves);
+                  std::vector<Position>& moves);
 
 #endif  // ROOK_H_

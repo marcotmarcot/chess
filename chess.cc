@@ -18,7 +18,8 @@ Move ReadHumanMove(const std::vector<Move>& valid_moves) {
       std::cout << "Invalid syntax." << std::endl;
       continue;
     }
-    if (std::find(valid_moves.begin(), valid_moves.end(), *move) == valid_moves.end()) {
+    if (std::find(valid_moves.begin(), valid_moves.end(), *move) ==
+        valid_moves.end()) {
       std::cout << "Invalid move. Valids: " << std::endl;
       for (const Move& valid_move : valid_moves) {
         std::cout << "  " << valid_move.String() << std::endl;
@@ -37,14 +38,16 @@ int main() {
   srand(unsigned(time(nullptr)));
   Board board;
   while (true) {
+    board.NewTurn(kWhite);
+    board.Print();
     auto valid_human_moves = board.GetMoves(kWhite);
     if (valid_human_moves.empty()) {
       std::cout << "You lose!" << std::endl;
       return 0;
     }
-    board.Print();
     Move human_move = ReadHumanMove(valid_human_moves);
     board.DoMove(human_move);
+    board.NewTurn(kBlack);
     board.Print();
     auto valid_ai_moves = board.GetMoves(kBlack);
     if (valid_ai_moves.empty()) {

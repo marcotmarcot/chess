@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "board.h"
+#include "move.h"
 #include "piece.h"
 #include "position.h"
 
@@ -14,7 +15,12 @@ class King : public Piece {
 
   std::string String() const override;
 
-  std::vector<Position> GetMoves(const Board& board, Position from) const override;
+  std::vector<Position> GetMoves(const Board& board,
+                                 Position from) const override;
+
+  void DoMove(Board& board, const Move& move) override;
+
+  bool Moved() const;
 
  private:
   bool moved_;

@@ -5,17 +5,22 @@
 #include <string>
 #include <vector>
 
+#include "bishop.h"
 #include "board.h"
 #include "color.h"
+#include "knight.h"
+#include "move.h"
 #include "piece.h"
 #include "position.h"
+#include "queen.h"
+#include "rook.h"
 
 namespace {
 
 int Forward(Color color) { return color == kWhite ? 1 : -1; }
 
 void GetRegularMoves(const Board& board, Position from, Color color,
-                  std::vector<Position>& moves) {
+                     std::vector<Position>& moves) {
   auto next = from.Move(0, Forward(color));
   if (!next.has_value()) {
     std::cerr << "Pawn in the last row";
@@ -39,7 +44,7 @@ void GetRegularMoves(const Board& board, Position from, Color color,
 }
 
 void GetCaptureMoves(const Board& board, Position from, Color color,
-                  std::vector<Position>& moves) {
+                     std::vector<Position>& moves) {
   for (int side = -1; side <= 1; side += 2) {
     auto to = from.Move(side, Forward(color));
     if (!to.has_value()) {
@@ -54,7 +59,7 @@ void GetCaptureMoves(const Board& board, Position from, Color color,
 }
 
 void GetEnPassantMoves(const Board& board, Position from, Color color,
-                    std::vector<Position>& moves) {
+                       std::vector<Position>& moves) {
   for (int side = -1; side <= 1; side += 2) {
     auto onSide = from.Move(side, 0);
     if (!onSide) {
@@ -77,6 +82,25 @@ void GetEnPassantMoves(const Board& board, Position from, Color color,
   }
 }
 
+std::unique_ptr<Piece> ReadPiece(Color color) {
+  while (true) {
+    std::cout << "Pawn promoted. What piece do you want? [queen, rook, bishop, "
+                 "knight]: ";
+    std::string piece;
+    std::cin >> piece;
+    if (piece == "queen") {
+      return std::make_unique<Queen>(color);
+    } else if (piece == "rook") {
+      return std::make_unique<Rook>(color);
+    } else if (piece == "bishop") {
+      return std::make_unique<Bishop>(color);
+    } else if (piece == "knight") {
+      return std::make_unique<Knight>(color);
+    }
+    std::cout << "Invalid piece!" << std::endl;
+  }
+}
+
 }  // namespace
 
 std::string Pawn::String() const { return GetColor() == kWhite ? "♙" : "♟"; }
@@ -90,3 +114,17 @@ std::vector<Position> Pawn::GetMoves(const Board& board, Position from) const {
 }
 
 bool Pawn::Double() const { return double_; }
+
+void Pawn::NewTurn(Board& board, Position position) {
+  double_ = false;
+  int y = position.Y();
+  if (y == 7 || y == 0) {
+    board.Set(position, ReadPiece(GetColor()));
+  }
+}
+
+void Pawn::DoMove(Board& board, const Move& move) {
+  if (abs(move.To().Y() - move.From().Y()) == 2) {
+    double_ = true;
+  }
+}

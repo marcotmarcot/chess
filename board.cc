@@ -54,7 +54,8 @@ std::vector<Move> GetMovesWithPossibleCheck(const Board& board, Color color) {
   return moves;
 }
 
-std::unique_ptr<Piece>& GetMutablePiece(std::unique_ptr<Piece> (&board)[8][8], Position position) {
+std::unique_ptr<Piece>& GetMutablePiece(std::unique_ptr<Piece> (&board)[8][8],
+                                        Position position) {
   return board[position.X()][position.Y()];
 }
 
@@ -70,7 +71,8 @@ void Board::Print() const {
     std::cout << y + 1 << " ";
     for (int x = 0; x <= 7; ++x) {
       const Piece* piece = GetPiece({x, y});
-      std::cout << "\e[48;5;" << ((x + y) % 2 == 0 ? "208" : "94") << "m" << (piece == nullptr ? " " :  piece->String());
+      std::cout << "\e[48;5;" << ((x + y) % 2 == 0 ? "208" : "94") << "m"
+                << (piece == nullptr ? " " : piece->String());
     }
     std::cout << "\e[0m";
     std::cout << std::endl;
@@ -80,12 +82,14 @@ void Board::Print() const {
 
 std::vector<Move> Board::GetMoves(Color color) {
   std::vector<Move> moves = GetMovesWithPossibleCheck(*this, color);
-  for (auto i = moves.begin(); i != moves.end(); ) {
-    std::unique_ptr<Piece> to = std::move(GetMutablePiece(board_, i->To()));
-    DoMove(*i);
+  for (auto i = moves.begin(); i != moves.end();) {
+    std::unique_ptr<Piece>& from = GetMutablePiece(board_, i->From());
+    std::unique_ptr<Piece>& to = GetMutablePiece(board_, i->To());
+    std::unique_ptr<Piece> to_copy = std::move(to);
+    to = std::move(from);
     bool is_check = IsCheck(color);
-    DoMove(Move(i->To(), i->From()));
-    GetMutablePiece(board_, i->To()) = std::move(to);
+    from = std::move(to);
+    to = std::move(to_copy);
     if (is_check) {
       i = moves.erase(i);
       continue;
@@ -102,20 +106,36 @@ const Piece* Board::GetPiece(Position position) const {
 bool Board::IsCheck(Color color) const {
   std::vector<Move> moves = GetMovesWithPossibleCheck(*this, Other(color));
   return std::find_if(moves.begin(), moves.end(), [&](const Move& move) {
-    auto piece = GetPiece(move.To());
-    if (piece == nullptr) {
-      return false;
-    }
-    if (piece->GetColor() != color) {
-      std::cerr << "Moving to piece of the same color.";
-      exit(1);
-    }
-    return dynamic_cast<const King*>(piece) != nullptr;
-  }) != moves.end();
+           auto piece = GetPiece(move.To());
+           if (piece == nullptr) {
+             return false;
+           }
+           if (piece->GetColor() != color) {
+             std::cerr << "Moving to piece of the same color.";
+             exit(1);
+           }
+           return dynamic_cast<const King*>(piece) != nullptr;
+         }) != moves.end();
 }
 
 void Board::DoMove(const Move& move) {
   std::unique_ptr<Piece>& from = GetMutablePiece(board_, move.From());
+  from->DoMove(*this, move);
   GetMutablePiece(board_, move.To()) = std::move(from);
   from = nullptr;
+}
+
+void Board::NewTurn(Color color) {
+  for (int x = 0; x <= 7; ++x) {
+    for (int y = 0; y <= 7; ++y) {
+      Piece* piece = board_[x][y].get();
+      if (piece != nullptr && piece->GetColor() == color) {
+        piece->NewTurn(*this, {x, y});
+      }
+    }
+  }
+}
+
+void Board::Set(Position position, std::unique_ptr<Piece> piece) {
+  GetMutablePiece(board_, position) = std::move(piece);
 }

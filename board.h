@@ -17,6 +17,8 @@ class Board {
   const Piece* GetPiece(Position position) const;
   bool IsCheck(Color color) const;
   void DoMove(const Move& move);
+  void NewTurn(Color color);
+  void Set(Position position, std::unique_ptr<Piece> piece);
 
  private:
   std::unique_ptr<Piece> board_[8][8];

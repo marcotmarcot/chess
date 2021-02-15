@@ -17,8 +17,12 @@ std::vector<Position> Rook::GetMoves(const Board& board, Position from) const {
   return moves;
 }
 
+void Rook::DoMove(Board& board, const Move& move) { moved_ = true; }
+
+bool Rook::Moved() const { return moved_; }
+
 void GetRookMoves(const Board& board, Position from, Color color,
-               std::vector<Position>& moves) {
+                  std::vector<Position>& moves) {
   for (int direction_x = -1; direction_x <= 1; direction_x += 2) {
     GetLinearMoves(board, from, color, direction_x, 0, moves);
   }

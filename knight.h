@@ -14,7 +14,8 @@ class Knight : public Piece {
 
   std::string String() const override;
 
-  std::vector<Position> GetMoves(const Board& board, Position from) const override;
+  std::vector<Position> GetMoves(const Board& board,
+                                 Position from) const override;
 };
 
 #endif  // KNIGHT_H_

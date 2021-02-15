@@ -10,7 +10,8 @@
 
 std::string Knight::String() const { return GetColor() == kWhite ? "♘" : "♞"; }
 
-std::vector<Position> Knight::GetMoves(const Board& board, Position from) const {
+std::vector<Position> Knight::GetMoves(const Board& board,
+                                       Position from) const {
   std::vector<Position> moves;
   for (int size_x = 1; size_x <= 2; ++size_x) {
     for (int direction_x = -1; direction_x <= 1; direction_x += 2) {

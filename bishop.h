@@ -15,10 +15,11 @@ class Bishop : public Piece {
 
   std::string String() const override;
 
-  std::vector<Position> GetMoves(const Board& board, Position from) const override;
+  std::vector<Position> GetMoves(const Board& board,
+                                 Position from) const override;
 };
 
 void GetBishopMoves(const Board& board, Position from, Color color,
-                 std::vector<Position>& moves);
+                    std::vector<Position>& moves);
 
 #endif  // BISHOP_H_
