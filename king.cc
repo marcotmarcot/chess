@@ -24,6 +24,7 @@ void GetRegularMoves(const Board& board, Position from, Color color,
   }
 }
 
+// TODO: Check if the king is in check in any position in the way.
 void GetCastlingMoves(const Board& board, Position from, Color color,
                       std::vector<Position>& moves) {
   for (int direction = -1; direction <= 1; direction += 2) {

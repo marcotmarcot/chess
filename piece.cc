@@ -12,6 +12,6 @@ Piece::Piece(Color color) : color_(color) {}
 
 Color Piece::GetColor() const { return color_; }
 
-void Piece::NewTurn(Board& board, Position position) {}
+void Piece::NewTurn() {}
 
 void Piece::DoMove(Board& board, const Move& move) {}

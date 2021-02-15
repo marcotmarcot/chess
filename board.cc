@@ -120,9 +120,10 @@ bool Board::IsCheck(Color color) const {
 
 void Board::DoMove(const Move& move) {
   std::unique_ptr<Piece>& from = GetMutablePiece(board_, move.From());
-  from->DoMove(*this, move);
-  GetMutablePiece(board_, move.To()) = std::move(from);
+  std::unique_ptr<Piece>& to = GetMutablePiece(board_, move.To());
+  to = std::move(from);
   from = nullptr;
+  to->DoMove(*this, move);
 }
 
 void Board::NewTurn(Color color) {
@@ -130,7 +131,7 @@ void Board::NewTurn(Color color) {
     for (int y = 0; y <= 7; ++y) {
       Piece* piece = board_[x][y].get();
       if (piece != nullptr && piece->GetColor() == color) {
-        piece->NewTurn(*this, {x, y});
+        piece->NewTurn();
       }
     }
   }

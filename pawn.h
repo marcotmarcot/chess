@@ -20,7 +20,7 @@ class Pawn : public Piece {
 
   bool Double() const;
 
-  void NewTurn(Board& board, Position position) override;
+  void NewTurn() override;
 
   void DoMove(Board& board, const Move& move) override;
 

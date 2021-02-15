@@ -23,7 +23,7 @@ class Piece {
 
   Color GetColor() const;
 
-  virtual void NewTurn(Board& board, Position position);
+  virtual void NewTurn();
 
   virtual void DoMove(Board& board, const Move& move);
 

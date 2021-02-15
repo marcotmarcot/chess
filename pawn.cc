@@ -115,16 +115,18 @@ std::vector<Position> Pawn::GetMoves(const Board& board, Position from) const {
 
 bool Pawn::Double() const { return double_; }
 
-void Pawn::NewTurn(Board& board, Position position) {
+void Pawn::NewTurn() {
   double_ = false;
-  int y = position.Y();
-  if (y == 7 || y == 0) {
-    board.Set(position, ReadPiece(GetColor()));
-  }
 }
 
 void Pawn::DoMove(Board& board, const Move& move) {
-  if (abs(move.To().Y() - move.From().Y()) == 2) {
+  Position to = move.To();
+  int to_y = to.Y();
+  if (abs(to_y - move.From().Y()) == 2) {
     double_ = true;
+    return;
+  }
+  if (to_y == 7 || to_y == 0) {
+    board.Set(to, ReadPiece(GetColor()));
   }
 }
