@@ -71,7 +71,7 @@ void Board::Print() const {
     std::cout << y + 1 << " ";
     for (int x = 0; x <= 7; ++x) {
       const Piece* piece = GetPiece({x, y});
-      std::cout << "\e[48;5;" << ((x + y) % 2 == 0 ? "208" : "94") << "m"
+      std::cout << "\e[48;5;" << ((x + y) % 2 == 0 ? "94" : "208") << "m"
                 << (piece == nullptr ? " " : piece->String());
     }
     std::cout << "\e[0m";
