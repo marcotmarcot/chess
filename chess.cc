@@ -34,6 +34,16 @@ Move ChooseAiMove(const std::vector<Move>& valid_moves) {
   return valid_moves[rand() % valid_moves.size()];
 }
 
+enum GameOutcome { kInProgress, kDraw, kCheckmate };
+
+GameOutcome GetGameOutcome(bool has_valid_moves, bool isCheck) {
+  if (has_valid_moves) {
+    return kInProgress;
+  } else {
+    return isCheck ? kCheckmate : kDraw;
+  }
+}
+
 int main() {
   srand(unsigned(time(nullptr)));
   Board board;
@@ -41,8 +51,12 @@ int main() {
     board.NewTurn(kWhite);
     board.Print();
     auto valid_human_moves = board.GetMoves(kWhite);
-    if (valid_human_moves.empty()) {
+    switch (GetGameOutcome(!valid_human_moves.empty(), board.IsCheck(kWhite))) {
+    case kCheckmate:
       std::cout << "You lose!" << std::endl;
+      return 0;
+    case kDraw:
+      std::cout << "Stalemate draw." << std::endl;
       return 0;
     }
     Move human_move = ReadHumanMove(valid_human_moves);
@@ -50,8 +64,12 @@ int main() {
     board.NewTurn(kBlack);
     board.Print();
     auto valid_ai_moves = board.GetMoves(kBlack);
-    if (valid_ai_moves.empty()) {
+    switch (GetGameOutcome(!valid_ai_moves.empty(), board.IsCheck(kBlack))) {
+    case kCheckmate:
       std::cout << "You win!" << std::endl;
+      return 0;
+    case kDraw:
+      std::cout << "Stalemate draw." << std::endl;
       return 0;
     }
     Move ai_move = ChooseAiMove(valid_ai_moves);
