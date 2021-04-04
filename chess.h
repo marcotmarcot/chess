@@ -1,3 +1,8 @@
+#ifndef CHESS_H_
+#define CHESS_H_
+
+#include <memory>
+
 class Piece {
  private:
   int x_;
@@ -31,3 +36,5 @@ class Board {
 };
 
 int main() { return 0; }
+
+#endif

@@ -23,6 +23,10 @@ class Rook : public Piece {
 
   bool Moved() const;
 
+  int Value() const override;
+
+  Piece* Clone() const override;
+
  private:
   bool moved_;
 };

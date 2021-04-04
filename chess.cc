@@ -5,8 +5,10 @@
 #include <vector>
 
 #include "board.h"
+#include "position.h"
 #include "color.h"
 #include "move.h"
+#include "engine.h"
 
 Move ReadHumanMove(const std::vector<Move>& valid_moves) {
   while (true) {
@@ -30,18 +32,13 @@ Move ReadHumanMove(const std::vector<Move>& valid_moves) {
   }
 }
 
-Move ChooseAiMove(const std::vector<Move>& valid_moves) {
-  return valid_moves[rand() % valid_moves.size()];
-}
-
-enum GameOutcome { kInProgress, kDraw, kCheckmate };
-
-GameOutcome GetGameOutcome(bool has_valid_moves, bool isCheck) {
-  if (has_valid_moves) {
-    return kInProgress;
-  } else {
-    return isCheck ? kCheckmate : kDraw;
+Move ChooseAiMove(Board& board) {
+  auto valid_moves = ComputeUtility(board, kBlack, 2, MaterialisticUtility);
+  std::sort(valid_moves.begin(), valid_moves.end(), MultiplierCompare(-1));
+  for (Move move : valid_moves) {
+    std::cout << move.From().String() << " " << move.To().String() << " " << move.Utility() << std::endl;
   }
+  return valid_moves.back();
 }
 
 int main() {
@@ -72,7 +69,7 @@ int main() {
       std::cout << "Stalemate draw." << std::endl;
       return 0;
     }
-    Move ai_move = ChooseAiMove(valid_ai_moves);
+    Move ai_move = ChooseAiMove(board);
     std::cout << "AI played: " << ai_move.String() << std::endl;
     board.DoMove(ai_move);
   }

@@ -73,3 +73,11 @@ void King::DoMove(Board& board, const Move& move) {
 }
 
 bool King::Moved() const { return moved_; }
+
+int King::Value() const {
+  return 40;  // this is all pieces plus 1
+}
+
+Piece* King::Clone() const {
+  return new King(*this);
+}

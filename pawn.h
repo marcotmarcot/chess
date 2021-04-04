@@ -24,6 +24,10 @@ class Pawn : public Piece {
 
   void DoMove(Board& board, const Move& move) override;
 
+  int Value() const override;
+
+  Piece* Clone() const override;
+
  private:
   bool double_;
 };

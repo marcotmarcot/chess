@@ -18,6 +18,14 @@ std::vector<Position> Bishop::GetMoves(const Board& board,
   return moves;
 }
 
+int Bishop::Value() const {
+  return 3;
+}
+
+Piece* Bishop::Clone() const {
+  return new Bishop(*this);
+}
+
 void GetBishopMoves(const Board& board, Position from, Color color,
                     std::vector<Position>& moves) {
   for (int direction_x = -1; direction_x <= 1; direction_x += 2) {

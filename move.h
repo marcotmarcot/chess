@@ -3,6 +3,7 @@
 
 #include <optional>
 #include <string>
+#include <memory>
 
 #include "position.h"
 
@@ -18,9 +19,13 @@ class Move {
 
   std::string String() const;
 
+  void SetUtility(double utility);
+  double Utility() const;
+
  private:
   Position from_;
   Position to_;
+  double utility_;
 };
 
 #endif  // MOVE_H_

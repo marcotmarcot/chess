@@ -25,3 +25,11 @@ std::vector<Position> Knight::GetMoves(const Board& board,
   }
   return moves;
 }
+
+int Knight::Value() const {
+  return 3;
+}
+
+Piece* Knight::Clone() const {
+  return new Knight(*this);
+}
