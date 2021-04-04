@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <chrono>
 #include <iostream>
 #include <vector>
 
@@ -33,7 +34,10 @@ Move ReadHumanMove(const std::vector<Move>& valid_moves) {
 }
 
 Move ChooseAiMove(Board& board) {
-  auto valid_moves = ComputeUtility(board, kBlack, 2, MaterialisticUtility);
+  auto t0 = std::chrono::high_resolution_clock::now();
+  auto valid_moves = ComputeUtility(board, kBlack, 3, MaterialisticUtility);
+  std::chrono::duration<double, std::milli> delta = std::chrono::high_resolution_clock::now() - t0;
+  std::cout << "Move found in: " << (delta.count() / 1000.0) << "s" << std::endl;
   std::sort(valid_moves.begin(), valid_moves.end(), MultiplierCompare(-1));
   for (Move move : valid_moves) {
     std::cout << move.From().String() << " " << move.To().String() << " " << move.Utility() << std::endl;

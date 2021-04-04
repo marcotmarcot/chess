@@ -104,19 +104,81 @@ const Piece* Board::GetPiece(Position position) const {
   return board_[position.X()][position.Y()].get();
 }
 
+std::optional<Position> Board::FindKing(Color color) const {
+  for (int i = 0; i < 8; ++i) {
+    for (int j = 0; j <  8; ++j) {
+      const King* king = dynamic_cast<const King*>(board_[i][j].get());
+      if (king && king->GetColor() == color) {
+        return Position(i, j);
+      }
+    }
+  }
+  return {};
+}
+
 bool Board::IsCheck(Color color) const {
-  std::vector<Move> moves = GetMovesWithPossibleCheck(*this, Other(color));
-  return std::find_if(moves.begin(), moves.end(), [&](const Move& move) {
-           auto piece = GetPiece(move.To());
-           if (piece == nullptr) {
-             return false;
-           }
-           if (piece->GetColor() != color) {
-             std::cerr << "Moving to piece of the same color.";
-             exit(1);
-           }
-           return dynamic_cast<const King*>(piece) != nullptr;
-         }) != moves.end();
+  auto kingpos = FindKing(color);
+  if (!kingpos.has_value()) {
+    return false;
+  }
+  Bishop bishop(color);
+  for (auto pos : bishop.GetMoves(*this, kingpos.value())) {
+    const Piece *p = this->GetPiece(pos);
+    if (dynamic_cast<const Bishop*>(p) != nullptr) {
+      return true;
+    } else if (dynamic_cast<const Queen*>(p) != nullptr) {
+      return true;
+    }
+  }
+  Rook rook(color);
+  for (auto pos : rook.GetMoves(*this, kingpos.value())) {
+    const Piece *p = this->GetPiece(pos);
+    if (dynamic_cast<const Rook*>(p) != nullptr) {
+      return true;
+    } else if (dynamic_cast<const Queen*>(p) != nullptr) {
+      return true;
+    }
+  }
+  Knight knight(color);
+  for (auto pos : knight.GetMoves(*this, kingpos.value())) {
+    const Piece *p = this->GetPiece(pos);
+    if (dynamic_cast<const Knight*>(p) != nullptr) {
+      return true;
+    }
+  }
+  std::vector<Position> pawns;
+  if (color == kWhite) {
+    int x, y;
+    x = kingpos.value().X() + 1;
+    y = kingpos.value().Y() + 1;
+    if (x < 8 && y < 8) {
+      pawns.emplace_back(x, y);
+    }
+    x = kingpos.value().X() - 1;
+    y = kingpos.value().Y() + 1;
+    if (x >= 0 && y < 8) {
+      pawns.emplace_back(x, y);
+    }
+  } else {
+    int x, y;
+    x = kingpos.value().X() + 1;
+    y = kingpos.value().Y() - 1;
+    if (x < 8 && y >= 0) {
+      pawns.emplace_back(x, y);
+    }
+    x = kingpos.value().X() - 1;
+    y = kingpos.value().Y() - 1;
+    if (x >= 0 && y >= 0) {
+      pawns.emplace_back(x, y);
+    }
+  }
+  for (auto pos : pawns) {
+    const Piece *p = this->GetPiece(pos);
+    if (dynamic_cast<const Pawn*>(p) != nullptr && p->GetColor() == Other(color)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void Board::DoMove(const Move& move) {
