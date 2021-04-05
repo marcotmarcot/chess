@@ -9,16 +9,17 @@ enum GameOutcome { kInProgress, kDraw, kCheckmate };
 
 GameOutcome GetGameOutcome(bool has_valid_moves, bool isCheck);
 
-std::vector<Move> ComputeUtility(Board& board, Color mycolor, int depth, double (*utility)(const Board& board, GameOutcome outcome, Color attackingcolor));
+std::vector<Move> ComputeUtility(Board& board, Color mycolor, int depth, double (*utility)(Board& board, GameOutcome outcome, Color attackingcolor));
 
-double MaterialisticUtility(const Board& board, GameOutcome outcome, Color attackingcolor);
+double MaterialisticUtility(Board& board, GameOutcome outcome, Color attackingcolor);
 
-struct MultiplierCompare {
+class ColorfulCompare {
+ public:
+  ColorfulCompare(Color color);
+  bool operator()(const Move& a, const Move& b);
+
+ private:
   int multiplier_;
-  MultiplierCompare(int multiplier) : multiplier_(multiplier) {}
-  bool operator()(Move a, Move b) {
-    return (multiplier_ * a.Utility()) < (multiplier_ * b.Utility());
-  }
 };
 
 #endif

@@ -33,12 +33,12 @@ Move ReadHumanMove(const std::vector<Move>& valid_moves) {
   }
 }
 
-Move ChooseAiMove(Board& board) {
+Move ChooseAiMove(Board& board, Color color, int depth, double (*utility)(Board& board, GameOutcome outcome, Color attackingcolor)) {
   auto t0 = std::chrono::high_resolution_clock::now();
-  auto valid_moves = ComputeUtility(board, kBlack, 3, MaterialisticUtility);
+  auto valid_moves = ComputeUtility(board, color, depth, utility);
   std::chrono::duration<double, std::milli> delta = std::chrono::high_resolution_clock::now() - t0;
   std::cout << "Move found in: " << (delta.count() / 1000.0) << "s" << std::endl;
-  std::sort(valid_moves.begin(), valid_moves.end(), MultiplierCompare(-1));
+  std::sort(valid_moves.begin(), valid_moves.end(), ColorfulCompare(color));
   for (Move move : valid_moves) {
     std::cout << move.From().String() << " " << move.To().String() << " " << move.Utility() << std::endl;
   }
@@ -73,7 +73,7 @@ int main() {
       std::cout << "Stalemate draw." << std::endl;
       return 0;
     }
-    Move ai_move = ChooseAiMove(board);
+    Move ai_move = ChooseAiMove(board, kBlack, 4, MaterialisticUtility);
     std::cout << "AI played: " << ai_move.String() << std::endl;
     board.DoMove(ai_move);
   }

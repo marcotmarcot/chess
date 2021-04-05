@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <limits>
 
@@ -7,12 +8,16 @@
 #include "engine.h"
 #include "move.h"
 
-int multiplier(Color color) {
+static int multiplier(Color color) {
   return color == kWhite ? 1 : -1;
 }
 
-Color switch_color(Color color) {
-  return color == kWhite ? kBlack : kWhite;
+ColorfulCompare::ColorfulCompare(Color color) {
+  multiplier_ = multiplier(color);
+}
+
+bool ColorfulCompare::operator()(const Move& a, const Move& b) {
+  return (multiplier_ * a.Utility()) < (multiplier_ * b.Utility());
 }
 
 GameOutcome GetGameOutcome(bool has_valid_moves, bool isCheck) {
@@ -23,7 +28,7 @@ GameOutcome GetGameOutcome(bool has_valid_moves, bool isCheck) {
   }
 }
 
-double MaterialisticUtility(const Board& board, GameOutcome outcome, Color attackingcolor) {
+double MaterialisticUtility(Board& board, GameOutcome outcome, Color attackingcolor) {
   switch (outcome) {
     case kCheckmate:
       return multiplier(attackingcolor) * std::numeric_limits<double>::infinity();
@@ -35,12 +40,33 @@ double MaterialisticUtility(const Board& board, GameOutcome outcome, Color attac
       for (auto piece : board.GetPieces()) {
         utility += piece->Value() * multiplier(piece->GetColor());
       }
+
       return utility;
   }
 }
 
-void ComputeUtilityInternal(Board& board, Color mycolor, int depth, double (*utility)(const Board& board, GameOutcome outcome, Color attackingcolor), std::vector<Move>& moves) {
-  auto theircolour = switch_color(mycolor);
+bool IsUtilityBetterThan(float a, float b, Color color) {
+  auto x = multiplier(color);
+  return a * x > b * x;
+}
+
+class CapturesFirst {
+ public:
+  CapturesFirst(const Board& board) : board_(board) {}
+  bool operator()(const Move& a, const Move& b) {
+    auto to_a = board_.GetPiece(a.To());
+    auto to_b = board_.GetPiece(b.To());
+    return to_a == nullptr && to_b != nullptr || (to_a != nullptr && to_b != nullptr && to_a->Value() < to_b->Value());
+  }
+ private:
+  const Board& board_;
+};
+
+void ComputeUtilityInternal(Board& board, Color mycolor, int depth, float theirbest, double (*utility)(Board& board, GameOutcome outcome, Color attackingcolor), std::vector<Move>& moves) {
+  auto theircolour = Other(mycolor);
+  float mybest = multiplier(theircolour) * std::numeric_limits<double>::infinity();
+  int c = 0;
+  std::sort(moves.rbegin(), moves.rend(), CapturesFirst(board));
   for (auto it = moves.begin(); it != moves.end(); ++it) {
     std::unique_ptr<Board::Snapshot> snapshot = board.TakeSnapshot();
     board.DoMove(*it);
@@ -50,16 +76,27 @@ void ComputeUtilityInternal(Board& board, Color mycolor, int depth, double (*uti
     if (depth == 0 || outcome != kInProgress) {
       it->SetUtility(utility(board, outcome, mycolor));
     } else {
-      ComputeUtilityInternal(board, theircolour, depth-1, utility, theirmoves);
-      auto theirbest = std::max_element(theirmoves.begin(), theirmoves.end(), MultiplierCompare(multiplier(theircolour)));
+      ComputeUtilityInternal(board, theircolour, depth-1, mybest, utility, theirmoves);
+      auto theirbest = std::max_element(theirmoves.begin(), theirmoves.end(), ColorfulCompare(theircolour));
       it->SetUtility(theirbest->Utility());
     }
     board.RecoverSnapshot(*snapshot);
+    if (IsUtilityBetterThan(it->Utility(), mybest, mycolor)) {
+      mybest = it->Utility();
+    }
+    ++c;
+    if (IsUtilityBetterThan(theirbest, it->Utility(), theircolour)) {
+      // We might as well stop now as the calling function already has a better solution than this.
+      break;
+    }
+  }
+  if (c < moves.size()) {
+    moves.erase(moves.begin() + c, moves.end());
   }
 }
 
-std::vector<Move> ComputeUtility(Board& board, Color mycolor, int depth, double (*utility)(const Board& board, GameOutcome outcome, Color attackingcolor)) {
+std::vector<Move> ComputeUtility(Board& board, Color mycolor, int depth, double (*utility)(Board& board, GameOutcome outcome, Color attackingcolor)) {
   std::vector<Move> moves = board.GetMoves(mycolor);
-  ComputeUtilityInternal(board, mycolor, depth, utility, moves);
+  ComputeUtilityInternal(board, mycolor, depth, multiplier(mycolor) * std::numeric_limits<double>::infinity(), utility, moves);
   return moves;
 }

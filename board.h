@@ -14,7 +14,7 @@ class Board {
  public:
   class Snapshot {
     Snapshot(Piece* board[8][8]);
-    std::shared_ptr<Piece> board_[8][8];
+    std::unique_ptr<Piece> board_[8][8];
     friend Board;
   };
   Board();
