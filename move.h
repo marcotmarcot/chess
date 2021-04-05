@@ -10,6 +10,7 @@
 class Move {
  public:
   static std::optional<Move> FromString(std::string from, std::string to);
+  static std::optional<Move> FromXboardString(std::string move);
 
   Move(Position from, Position to);
   bool operator==(const Move& move) const;
@@ -18,6 +19,7 @@ class Move {
   Position To() const;
 
   std::string String() const;
+  std::string XboardString() const;
 
   void SetUtility(double utility);
   double Utility() const;
