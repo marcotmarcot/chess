@@ -73,7 +73,7 @@ int main() {
       std::cout << "Stalemate draw." << std::endl;
       return 0;
     }
-    Move ai_move = ChooseAiMove(board, kBlack, 4, MaterialisticUtility);
+    Move ai_move = ChooseAiMove(board, kBlack, 4, SmartUtility);
     std::cout << "AI played: " << ai_move.String() << std::endl;
     board.DoMove(ai_move);
   }

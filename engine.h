@@ -12,6 +12,7 @@ GameOutcome GetGameOutcome(bool has_valid_moves, bool isCheck);
 std::vector<Move> ComputeUtility(Board& board, Color mycolor, int depth, double (*utility)(Board& board, GameOutcome outcome, Color attackingcolor));
 
 double MaterialisticUtility(Board& board, GameOutcome outcome, Color attackingcolor);
+double SmartUtility(Board& board, GameOutcome outcome, Color attackingcolor);
 
 class ColorfulCompare {
  public:

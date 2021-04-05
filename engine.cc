@@ -45,6 +45,33 @@ double MaterialisticUtility(Board& board, GameOutcome outcome, Color attackingco
   }
 }
 
+double SmartUtility(Board& board, GameOutcome outcome, Color attackingcolor) {
+  switch (outcome) {
+    case kCheckmate:
+      return multiplier(attackingcolor) * std::numeric_limits<double>::infinity();
+    case kDraw:
+      return 0.0;
+    default:
+      float utility = 0;
+      float my_value = 0;
+      float their_value = 0;
+
+      for (auto piece : board.GetPieces()) {
+        utility += piece->Value() * multiplier(piece->GetColor());
+        if (piece->GetColor() == attackingcolor) {
+          my_value += piece->Value();
+        } else {
+          their_value += piece->Value();
+        }
+      }
+
+      float space = std::pow(board.GetMoves(attackingcolor).size(), 0.05);
+      float ratio = std::pow(my_value / their_value, 0.05);
+
+      return utility * space * ratio;
+  }
+}
+
 bool IsUtilityBetterThan(float a, float b, Color color) {
   auto x = multiplier(color);
   return a * x > b * x;
