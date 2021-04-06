@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
           continue;
         }
 
-        Move ai_move = ChooseAiMove(board, kBlack, 2, SmartUtility);
+        Move ai_move = ChooseAiMove(board, kBlack, 3, SmartUtility);
         board.DoMove(ai_move);
         std::cout << "move " << ai_move.XboardString() << std::endl;
         board.NewTurn(kWhite);
