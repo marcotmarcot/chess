@@ -66,9 +66,9 @@ void King::DoMove(Board& board, const Move& move) {
   int y = move.From().Y();
   int diff = move.To().X() - move.From().X();
   if (diff == 2) {
-    board.DoMove({{7, y}, {5, y}});
+    board.DoMove({{7, y}, {5, y}, std::nullopt});
   } else if (diff == -2) {
-    board.DoMove({{0, y}, {3, y}});
+    board.DoMove({{0, y}, {3, y}, std::nullopt});
   }
 }
 

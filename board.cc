@@ -47,8 +47,16 @@ std::vector<Move> GetMovesWithPossibleCheck(const Board& board, Color color) {
         continue;
       }
       std::vector<Position> tos = piece->GetMoves(board, from);
+      bool is_pawn = dynamic_cast<const Pawn*>(piece) != nullptr;
       for (const auto to : tos) {
-        moves.emplace_back(from, to);
+        if (is_pawn && (to.Y() == 0 || to.Y() == 7)) {
+          moves.emplace_back(from, to, kBishop);
+          moves.emplace_back(from, to, kKnight);
+          moves.emplace_back(from, to, kQueen);
+          moves.emplace_back(from, to, kRook);
+        } else {
+          moves.emplace_back(from, to, std::nullopt);
+        }
       }
     }
   }

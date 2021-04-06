@@ -7,12 +7,19 @@
 
 #include "position.h"
 
+enum Promotion {
+  kBishop,
+  kKnight,
+  kQueen,
+  kRook,
+};
+
 class Move {
  public:
   static std::optional<Move> FromString(std::string from, std::string to);
   static std::optional<Move> FromXboardString(std::string move);
 
-  Move(Position from, Position to);
+  Move(Position from, Position to, std::optional<Promotion> promotion);
   bool operator==(const Move& move) const;
 
   Position From() const;
@@ -24,9 +31,12 @@ class Move {
   void SetUtility(double utility);
   double Utility() const;
 
+  std::optional<Promotion> PromoteTo() const;
+
  private:
   Position from_;
   Position to_;
+  std::optional<Promotion> promotion_;
   double utility_;
 };
 

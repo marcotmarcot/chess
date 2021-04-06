@@ -82,25 +82,6 @@ void GetCaptureMoves(const Board& board, Position from, Color color,
 //   }
 // }
 
-std::unique_ptr<Piece> ReadPiece(Color color) {
-  while (true) {
-    std::cout << "Pawn promoted. What piece do you want? [queen, rook, bishop, "
-                 "knight]: ";
-    std::string piece;
-    std::cin >> piece;
-    if (piece == "queen") {
-      return std::make_unique<Queen>(color);
-    } else if (piece == "rook") {
-      return std::make_unique<Rook>(color);
-    } else if (piece == "bishop") {
-      return std::make_unique<Bishop>(color);
-    } else if (piece == "knight") {
-      return std::make_unique<Knight>(color);
-    }
-    std::cout << "Invalid piece!" << std::endl;
-  }
-}
-
 }  // namespace
 
 std::string Pawn::String() const { return GetColor() == kWhite ? "♙" : "♟"; }
@@ -127,7 +108,24 @@ void Pawn::DoMove(Board& board, const Move& move) {
     return;
   }
   if (to_y == 7 || to_y == 0) {
-    board.Set(to, std::make_unique<Queen>(GetColor()));
+    Promotion promote_to = move.PromoteTo().value_or(kQueen);
+    switch (promote_to) {
+      case kBishop:
+        board.Set(to, std::make_unique<Bishop>(GetColor()));
+        break;
+      case kKnight:
+        board.Set(to, std::make_unique<Knight>(GetColor()));
+        break;
+      case kQueen:
+        board.Set(to, std::make_unique<Queen>(GetColor()));
+        break;
+      case kRook:
+        board.Set(to, std::make_unique<Rook>(GetColor()));
+        break;
+      default:
+        board.Set(to, std::make_unique<Queen>(GetColor()));
+        break;
+    }
   }
 }
 
