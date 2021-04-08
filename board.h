@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <list>
 
 #include "color.h"
 #include "move.h"
@@ -11,14 +12,23 @@
 
 class Board {
  public:
+  class Snapshot {
+    Snapshot(Piece* board[8][8]);
+    std::unique_ptr<Piece> board_[8][8];
+    friend Board;
+  };
   Board();
   void Print() const;
   std::vector<Move> GetMoves(Color color);
   const Piece* GetPiece(Position position) const;
+  std::list<const Piece*> GetPieces() const;
   bool IsCheck(Color color) const;
   void DoMove(const Move& move);
+  std::unique_ptr<Snapshot> TakeSnapshot() const;
+  void RecoverSnapshot(const Snapshot& snapshot);
   void NewTurn(Color color);
   void Set(Position position, std::unique_ptr<Piece> piece);
+  std::optional<Position> FindKing(Color color) const;
 
  private:
   std::unique_ptr<Piece> board_[8][8];

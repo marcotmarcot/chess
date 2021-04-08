@@ -58,48 +58,29 @@ void GetCaptureMoves(const Board& board, Position from, Color color,
   }
 }
 
-void GetEnPassantMoves(const Board& board, Position from, Color color,
-                       std::vector<Position>& moves) {
-  for (int side = -1; side <= 1; side += 2) {
-    auto onSide = from.Move(side, 0);
-    if (!onSide) {
-      continue;
-    }
-    auto piece = board.GetPiece(*onSide);
-    if (!piece || piece->GetColor() == color) {
-      continue;
-    }
-    auto pawn = dynamic_cast<const Pawn*>(piece);
-    if (!pawn || !pawn->Double()) {
-      continue;
-    }
-    auto to = from.Move(side, Forward(color));
-    if (!to) {
-      std::cerr << "Pawn in first row";
-      exit(1);
-    }
-    moves.push_back(*to);
-  }
-}
-
-std::unique_ptr<Piece> ReadPiece(Color color) {
-  while (true) {
-    std::cout << "Pawn promoted. What piece do you want? [queen, rook, bishop, "
-                 "knight]: ";
-    std::string piece;
-    std::cin >> piece;
-    if (piece == "queen") {
-      return std::make_unique<Queen>(color);
-    } else if (piece == "rook") {
-      return std::make_unique<Rook>(color);
-    } else if (piece == "bishop") {
-      return std::make_unique<Bishop>(color);
-    } else if (piece == "knight") {
-      return std::make_unique<Knight>(color);
-    }
-    std::cout << "Invalid piece!" << std::endl;
-  }
-}
+// void GetEnPassantMoves(const Board& board, Position from, Color color,
+//                        std::vector<Position>& moves) {
+//   for (int side = -1; side <= 1; side += 2) {
+//     auto onSide = from.Move(side, 0);
+//     if (!onSide) {
+//       continue;
+//     }
+//     auto piece = board.GetPiece(*onSide);
+//     if (!piece || piece->GetColor() == color) {
+//       continue;
+//     }
+//     auto pawn = dynamic_cast<const Pawn*>(piece);
+//     if (!pawn || !pawn->Double()) {
+//       continue;
+//     }
+//     auto to = from.Move(side, Forward(color));
+//     if (!to) {
+//       std::cerr << "Pawn in first row";
+//       exit(1);
+//     }
+//     moves.push_back(*to);
+//   }
+// }
 
 }  // namespace
 
@@ -109,7 +90,7 @@ std::vector<Position> Pawn::GetMoves(const Board& board, Position from) const {
   std::vector<Position> moves;
   GetRegularMoves(board, from, GetColor(), moves);
   GetCaptureMoves(board, from, GetColor(), moves);
-  GetEnPassantMoves(board, from, GetColor(), moves);
+  // GetEnPassantMoves(board, from, GetColor(), moves);
   return moves;
 }
 
@@ -127,6 +108,31 @@ void Pawn::DoMove(Board& board, const Move& move) {
     return;
   }
   if (to_y == 7 || to_y == 0) {
-    board.Set(to, ReadPiece(GetColor()));
+    Promotion promote_to = move.PromoteTo().value_or(kQueen);
+    switch (promote_to) {
+      case kBishop:
+        board.Set(to, std::make_unique<Bishop>(GetColor()));
+        break;
+      case kKnight:
+        board.Set(to, std::make_unique<Knight>(GetColor()));
+        break;
+      case kQueen:
+        board.Set(to, std::make_unique<Queen>(GetColor()));
+        break;
+      case kRook:
+        board.Set(to, std::make_unique<Rook>(GetColor()));
+        break;
+      default:
+        board.Set(to, std::make_unique<Queen>(GetColor()));
+        break;
+    }
   }
+}
+
+int Pawn::Value() const {
+  return 1;
+}
+
+Piece* Pawn::Clone() const {
+  return new Pawn(*this);
 }

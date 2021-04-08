@@ -16,6 +16,10 @@ class Knight : public Piece {
 
   std::vector<Position> GetMoves(const Board& board,
                                  Position from) const override;
+
+  int Value() const override;
+
+  Piece* Clone() const override;
 };
 
 #endif  // KNIGHT_H_

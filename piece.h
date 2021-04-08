@@ -27,6 +27,10 @@ class Piece {
 
   virtual void DoMove(Board& board, const Move& move);
 
+  virtual int Value() const = 0;
+
+  virtual Piece* Clone() const = 0;
+
  private:
   const Color color_;
 };

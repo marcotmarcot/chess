@@ -17,3 +17,11 @@ std::vector<Position> Queen::GetMoves(const Board& board, Position from) const {
   GetRookMoves(board, from, GetColor(), moves);
   return moves;
 }
+
+int Queen::Value() const {
+  return 9;
+}
+
+Piece* Queen::Clone() const {
+  return new Queen(*this);
+}

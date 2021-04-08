@@ -17,6 +17,10 @@ class Bishop : public Piece {
 
   std::vector<Position> GetMoves(const Board& board,
                                  Position from) const override;
+
+  int Value() const override;
+
+  Piece* Clone() const override;
 };
 
 void GetBishopMoves(const Board& board, Position from, Color color,

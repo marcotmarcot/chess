@@ -30,3 +30,11 @@ void GetRookMoves(const Board& board, Position from, Color color,
     GetLinearMoves(board, from, color, 0, direction_y, moves);
   }
 }
+
+int Rook::Value() const {
+  return 5;
+}
+
+Piece* Rook::Clone() const {
+  return new Rook(*this);
+}

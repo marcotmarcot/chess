@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <list>
 
 #include "bishop.h"
 #include "color.h"
@@ -46,8 +47,16 @@ std::vector<Move> GetMovesWithPossibleCheck(const Board& board, Color color) {
         continue;
       }
       std::vector<Position> tos = piece->GetMoves(board, from);
+      bool is_pawn = dynamic_cast<const Pawn*>(piece) != nullptr;
       for (const auto to : tos) {
-        moves.emplace_back(from, to);
+        if (is_pawn && (to.Y() == 0 || to.Y() == 7)) {
+          moves.emplace_back(from, to, kBishop);
+          moves.emplace_back(from, to, kKnight);
+          moves.emplace_back(from, to, kQueen);
+          moves.emplace_back(from, to, kRook);
+        } else {
+          moves.emplace_back(from, to, std::nullopt);
+        }
       }
     }
   }
@@ -71,7 +80,7 @@ void Board::Print() const {
     std::cout << y + 1 << " ";
     for (int x = 0; x <= 7; ++x) {
       const Piece* piece = GetPiece({x, y});
-      std::cout << "\e[48;5;" << ((x + y) % 2 == 0 ? "208" : "94") << "m"
+      std::cout << "\e[48;5;" << ((x + y) % 2 == 0 ? "94" : "208") << "m"
                 << (piece == nullptr ? " " : piece->String());
     }
     std::cout << "\e[0m";
@@ -103,19 +112,81 @@ const Piece* Board::GetPiece(Position position) const {
   return board_[position.X()][position.Y()].get();
 }
 
+std::optional<Position> Board::FindKing(Color color) const {
+  for (int i = 0; i < 8; ++i) {
+    for (int j = 0; j <  8; ++j) {
+      const King* king = dynamic_cast<const King*>(board_[i][j].get());
+      if (king && king->GetColor() == color) {
+        return Position(i, j);
+      }
+    }
+  }
+  return {};
+}
+
 bool Board::IsCheck(Color color) const {
-  std::vector<Move> moves = GetMovesWithPossibleCheck(*this, Other(color));
-  return std::find_if(moves.begin(), moves.end(), [&](const Move& move) {
-           auto piece = GetPiece(move.To());
-           if (piece == nullptr) {
-             return false;
-           }
-           if (piece->GetColor() != color) {
-             std::cerr << "Moving to piece of the same color.";
-             exit(1);
-           }
-           return dynamic_cast<const King*>(piece) != nullptr;
-         }) != moves.end();
+  auto kingpos = FindKing(color);
+  if (!kingpos.has_value()) {
+    return false;
+  }
+  Bishop bishop(color);
+  for (auto pos : bishop.GetMoves(*this, kingpos.value())) {
+    const Piece *p = this->GetPiece(pos);
+    if (dynamic_cast<const Bishop*>(p) != nullptr) {
+      return true;
+    } else if (dynamic_cast<const Queen*>(p) != nullptr) {
+      return true;
+    }
+  }
+  Rook rook(color);
+  for (auto pos : rook.GetMoves(*this, kingpos.value())) {
+    const Piece *p = this->GetPiece(pos);
+    if (dynamic_cast<const Rook*>(p) != nullptr) {
+      return true;
+    } else if (dynamic_cast<const Queen*>(p) != nullptr) {
+      return true;
+    }
+  }
+  Knight knight(color);
+  for (auto pos : knight.GetMoves(*this, kingpos.value())) {
+    const Piece *p = this->GetPiece(pos);
+    if (dynamic_cast<const Knight*>(p) != nullptr) {
+      return true;
+    }
+  }
+  std::vector<Position> pawns;
+  if (color == kWhite) {
+    int x, y;
+    x = kingpos.value().X() + 1;
+    y = kingpos.value().Y() + 1;
+    if (x < 8 && y < 8) {
+      pawns.emplace_back(x, y);
+    }
+    x = kingpos.value().X() - 1;
+    y = kingpos.value().Y() + 1;
+    if (x >= 0 && y < 8) {
+      pawns.emplace_back(x, y);
+    }
+  } else {
+    int x, y;
+    x = kingpos.value().X() + 1;
+    y = kingpos.value().Y() - 1;
+    if (x < 8 && y >= 0) {
+      pawns.emplace_back(x, y);
+    }
+    x = kingpos.value().X() - 1;
+    y = kingpos.value().Y() - 1;
+    if (x >= 0 && y >= 0) {
+      pawns.emplace_back(x, y);
+    }
+  }
+  for (auto pos : pawns) {
+    const Piece *p = this->GetPiece(pos);
+    if (dynamic_cast<const Pawn*>(p) != nullptr && p->GetColor() == Other(color)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void Board::DoMove(const Move& move) {
@@ -139,4 +210,51 @@ void Board::NewTurn(Color color) {
 
 void Board::Set(Position position, std::unique_ptr<Piece> piece) {
   GetMutablePiece(board_, position) = std::move(piece);
+}
+
+std::list<const Piece*> Board::GetPieces() const {
+  std::list<const Piece*> pieces;
+  for (int x = 0; x <= 7; ++x) {
+    for (int y = 0; y <= 7; ++y) {
+      Piece* piece = board_[x][y].get();
+      if (piece != nullptr) {
+        pieces.push_back(piece);
+      }
+    }
+  }
+  return pieces;
+}
+
+std::unique_ptr<Board::Snapshot> Board::TakeSnapshot() const {
+  Piece* board[8][8];
+  for (int i = 0; i < 8; ++i) {
+    for (int j = 0; j < 8; ++j) {
+      if (board_[i][j] != nullptr) {
+        board[i][j] = board_[i][j]->Clone();
+      } else {
+        board[i][j] = nullptr;
+      }
+    }
+  }
+  return std::unique_ptr<Board::Snapshot>(new Board::Snapshot(board));
+}
+
+void Board::RecoverSnapshot(const Board::Snapshot& snapshot) {
+  for (int i = 0; i < 8; ++i) {
+    for (int j = 0; j < 8; ++j) {
+      if (snapshot.board_[i][j] != nullptr) {
+        board_[i][j] = std::unique_ptr<Piece>(snapshot.board_[i][j]->Clone());
+      } else {
+        board_[i][j].reset();
+      }
+    }
+  }
+}
+
+Board::Snapshot::Snapshot(Piece* board[8][8]) {
+  for (int i = 0; i < 8; ++i) {
+    for (int j = 0; j < 8; ++j) {
+      board_[i][j] = std::unique_ptr<Piece>(board[i][j]);
+    }
+  }
 }
