@@ -48,7 +48,39 @@ Move ChooseAiMove(Board& board, Color color, int depth, double (*utility)(Board&
 }
 
 int main(int argc, char *argv[]) {
-  if (argc > 1 && !strcmp(argv[1], "xboard")) {
+  if (argc > 1 && !strcmp(argv[1], "ascii")) {
+    srand(unsigned(time(nullptr)));
+    Board board;
+    while (true) {
+      board.NewTurn(kWhite);
+      board.Print();
+      auto valid_human_moves = board.GetMoves(kWhite);
+      switch (GetGameOutcome(!valid_human_moves.empty(), board.IsCheck(kWhite))) {
+      case kCheckmate:
+        std::cout << "You lose!" << std::endl;
+        return 0;
+      case kDraw:
+        std::cout << "Stalemate draw." << std::endl;
+        return 0;
+      }
+      Move human_move = ReadHumanMove(valid_human_moves);
+      board.DoMove(human_move);
+      board.NewTurn(kBlack);
+      board.Print();
+      auto valid_ai_moves = board.GetMoves(kBlack);
+      switch (GetGameOutcome(!valid_ai_moves.empty(), board.IsCheck(kBlack))) {
+      case kCheckmate:
+        std::cout << "You win!" << std::endl;
+        return 0;
+      case kDraw:
+        std::cout << "Stalemate draw." << std::endl;
+        return 0;
+      }
+      Move ai_move = ChooseAiMove(board, kBlack, 4, SmartUtility);
+      std::cout << "AI played: " << ai_move.String() << std::endl;
+      board.DoMove(ai_move);
+    }
+  } else {
     std::cout.setf(std::ios::unitbuf);
     std::string line;
     std::getline(std::cin, line);
@@ -130,38 +162,6 @@ int main(int argc, char *argv[]) {
           continue;
         }
       }
-    }
-  } else {
-    srand(unsigned(time(nullptr)));
-    Board board;
-    while (true) {
-      board.NewTurn(kWhite);
-      board.Print();
-      auto valid_human_moves = board.GetMoves(kWhite);
-      switch (GetGameOutcome(!valid_human_moves.empty(), board.IsCheck(kWhite))) {
-      case kCheckmate:
-        std::cout << "You lose!" << std::endl;
-        return 0;
-      case kDraw:
-        std::cout << "Stalemate draw." << std::endl;
-        return 0;
-      }
-      Move human_move = ReadHumanMove(valid_human_moves);
-      board.DoMove(human_move);
-      board.NewTurn(kBlack);
-      board.Print();
-      auto valid_ai_moves = board.GetMoves(kBlack);
-      switch (GetGameOutcome(!valid_ai_moves.empty(), board.IsCheck(kBlack))) {
-      case kCheckmate:
-        std::cout << "You win!" << std::endl;
-        return 0;
-      case kDraw:
-        std::cout << "Stalemate draw." << std::endl;
-        return 0;
-      }
-      Move ai_move = ChooseAiMove(board, kBlack, 4, SmartUtility);
-      std::cout << "AI played: " << ai_move.String() << std::endl;
-      board.DoMove(ai_move);
     }
   }
   return 0;
