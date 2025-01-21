@@ -50,6 +50,8 @@ void GetCastlingMoves(const Board& board, Position from, Color color,
 
 }  // namespace
 
+King::King(Color color, bool moved) : Piece(color), moved_(moved) {}
+
 std::string King::String() const { return GetColor() == kWhite ? "♔" : "♚"; }
 
 std::vector<Position> King::GetMoves(const Board& board, Position from) const {

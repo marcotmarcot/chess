@@ -186,6 +186,13 @@ bool Board::IsCheck(Color color) const {
       return true;
     }
   }
+  King king(color, /* moved = */ true);  // A king would not arttack another by castling.
+  for (auto pos : king.GetMoves(*this, kingpos.value())) {
+    const Piece *p = this->GetPiece(pos);
+    if (dynamic_cast<const King*>(p) != nullptr) {
+      return true;
+    }
+  }
   return false;
 }
 

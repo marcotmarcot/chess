@@ -5,13 +5,14 @@
 #include <vector>
 
 #include "board.h"
+#include "color.h"
 #include "move.h"
 #include "piece.h"
 #include "position.h"
 
 class King : public Piece {
  public:
-  using Piece::Piece;
+  King(Color color, bool moved = false);
 
   std::string String() const override;
 
