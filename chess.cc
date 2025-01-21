@@ -13,6 +13,8 @@
 #include "move.h"
 #include "engine.h"
 
+constexpr int DEPTH = 2;
+
 Move ReadHumanMove(const std::vector<Move>& valid_moves) {
   while (true) {
     std::cout << "Your move: ";
@@ -76,7 +78,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Stalemate draw." << std::endl;
         return 0;
       }
-      Move ai_move = ChooseAiMove(board, kBlack, 4, SmartUtility);
+      Move ai_move = ChooseAiMove(board, kBlack, DEPTH, SmartUtility);
       std::cout << "AI played: " << ai_move.String() << std::endl;
       board.DoMove(ai_move);
     }
@@ -117,7 +119,7 @@ int main(int argc, char *argv[]) {
       } else if (command == "go") {
         board.NewTurn(mycolor);
         auto valid_ai_moves = board.GetMoves(mycolor);
-        Move ai_move = ChooseAiMove(board, mycolor, 4, SmartUtility);
+        Move ai_move = ChooseAiMove(board, mycolor, DEPTH, SmartUtility);
         board.DoMove(ai_move);
         std::cout << "move " << ai_move.XboardString() << std::endl;
         board.NewTurn(Other(mycolor));
